@@ -1,18 +1,13 @@
 // import "./polyfills";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NavigationContainer } from "@react-navigation/native";
 import { ConnectionProvider } from "@solana/wallet-adapter-react";
 import { clusterApiUrl, PublicKey, PublicKeyInitData } from "@solana/web3.js";
 import React, { Suspense } from "react";
-import {
-  ActivityIndicator,
-  AppState,
-  SafeAreaView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { AppState, SafeAreaView, StyleSheet } from "react-native";
+import { View } from "react-native-ui-lib";
 import { Cache, SWRConfig } from "swr";
 import MainScreen from "./src/screens/Main";
-import { AuthedUserProvider } from "./src/utils";
 
 const DEVNET_ENDPOINT = /*#__PURE__*/ clusterApiUrl("mainnet-beta");
 
@@ -63,21 +58,17 @@ export default function App() {
       config={{ commitment: "processed" }}
       endpoint={DEVNET_ENDPOINT}
     >
-      <SafeAreaView style={styles.shell}>
-        <Suspense
-          fallback={
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" style={styles.loadingIndicator} />
-            </View>
-          }
-        >
-          <SWRConfig value={{ provider: asyncStorageProvider }}>
-            <AuthedUserProvider>
-              <MainScreen />
-            </AuthedUserProvider>
-          </SWRConfig>
-        </Suspense>
-      </SafeAreaView>
+      <NavigationContainer>
+        <SafeAreaView style={styles.shell}>
+          <View flex bg-primaryBG>
+            <Suspense fallback={null}>
+              <SWRConfig value={{ provider: asyncStorageProvider }}>
+                <MainScreen />
+              </SWRConfig>
+            </Suspense>
+          </View>
+        </SafeAreaView>
+      </NavigationContainer>
     </ConnectionProvider>
   );
 }

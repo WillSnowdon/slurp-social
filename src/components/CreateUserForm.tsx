@@ -1,6 +1,6 @@
 import { FileUriData } from "@spling/social-protocol";
 import React, { useCallback, useContext, useState } from "react";
-import ImagePicker, { Image } from "react-native-image-crop-picker";
+import { Image } from "react-native-image-crop-picker";
 import { Button, Incubator, View } from "react-native-ui-lib";
 import { AuthedUserContext } from "../utils";
 import { useSplingTransact } from "../utils/transact";
@@ -12,27 +12,6 @@ export default function CreateUserForm() {
   const [avatar, setAvatar] = useState<Image>();
   const transact = useSplingTransact();
   const { updateUser } = useContext(AuthedUserContext);
-
-  const handlePickAvatar = useCallback(async () => {
-    try {
-      const pickedImage = await ImagePicker.openPicker({
-        multiple: false,
-        mediaType: "photo",
-      });
-
-      const croppedImage = await ImagePicker.openCropper({
-        path: pickedImage.path,
-        mediaType: "photo",
-        cropperCircleOverlay: true,
-        enableRotationGesture: false,
-        cropperRotateButtonsHidden: true,
-      });
-
-      setAvatar(croppedImage);
-    } catch (e) {
-      console.log(e);
-    }
-  }, [setAvatar]);
 
   const handleCreateUser = useCallback(async () => {
     const user = await transact(async (socialProtocal) => {
@@ -53,12 +32,13 @@ export default function CreateUserForm() {
 
   return (
     <View center flex>
-      <EditableAvatar onUpdate={handlePickAvatar} />
+      <EditableAvatar uri={avatar?.path} onUpdate={setAvatar} />
       <View width={260} marginT-32>
         <Incubator.TextField
           showCharCounter
-          placeholder="Username"
+          placeholder="Nickname"
           maxLength={64}
+          floatingPlaceholder
           onChangeText={setUserName}
         />
 
@@ -67,6 +47,7 @@ export default function CreateUserForm() {
           placeholder="Who are you"
           maxLength={256}
           multiline
+          floatingPlaceholder
           onChangeText={setBio}
         />
         <View marginT-16>

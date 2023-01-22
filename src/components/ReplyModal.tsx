@@ -1,4 +1,4 @@
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import MaterialIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React, { useCallback, useRef, useState } from "react";
 import { SafeAreaView, TextInput, TouchableOpacity } from "react-native";
 import Modal from "react-native-modal";

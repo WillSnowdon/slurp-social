@@ -1,8 +1,11 @@
 import { Colors, ThemeManager } from "react-native-ui-lib";
 
+const primary = "#c183de";
+
 Colors.loadColors({
-  buttonBG: "#c183de",
+  buttonBG: primary,
   mainBG: "#fff",
+  primaryBG: primary,
   postBG: "#fff",
   replyBG: "#fafafa",
   postInputModalBG: "#fff",
@@ -10,8 +13,8 @@ Colors.loadColors({
   tabBarBG: "white",
   postInputBG: "white",
   bannerBG: "#d1b9dd",
-  tabBarIcon: "#c183de",
-  tabBarIconActive: "#c183de",
+  tabBarIcon: primary,
+  tabBarIconActive: primary,
   lightIcon: Colors.$textNeutralLight,
 });
 

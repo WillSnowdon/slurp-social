@@ -49,7 +49,6 @@ export default function FeedScreen() {
   const [initialRequest, setInitialRequest] = useState(false);
   const nav = useNavigation<FeedNavProp>();
   const authedUser = useContext(AuthedUserContext).authedUser as SlurpUser;
-
   const getPosts = useCallback(async () => {
     if (!protoGetters) return;
     try {

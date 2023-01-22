@@ -1,4 +1,5 @@
 import { User } from "@spling/social-protocol";
+import merge from "lodash/merge";
 import React, { FunctionComponent, PropsWithChildren } from "react";
 import useSWR from "swr";
 import { SlurpUser } from "./types";
@@ -21,7 +22,8 @@ export const AuthedUserProvider: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
   const socialProto = useSocialProtocolGetters();
-  const auth = useSWR(socialProto ? "authed-user" : null, () =>
+  // TODO: needs updating to taking into account wallet switch,.
+  const auth = useSWR("authed-user", () =>
     socialProto?.getAuthedUser().then(toSlurpUser)
   );
 
@@ -39,7 +41,12 @@ export const AuthedUserProvider: FunctionComponent<PropsWithChildren> = ({
 
           return user;
         },
-        updateUser: (user: User) => auth.mutate(toSlurpUser(user)),
+        updateUser: (user: User) => {
+          // merge because update method doesn't have pubkey for some reason
+          const mergedUser = toSlurpUser(merge({}, auth.data, user));
+
+          auth.mutate(mergedUser);
+        },
       }}
     >
       {children}

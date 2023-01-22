@@ -41,7 +41,6 @@ export default function EditableAvatar({
       style={{
         height: size,
         width: size,
-        backgroundColor: Colors.grey10,
         borderRadius: size / 2,
         overflow: "hidden",
         position: "relative",
@@ -50,7 +49,11 @@ export default function EditableAvatar({
       accessibilityLabel="Select Avatar"
       onPress={handlePickAvatar}
     >
-      <Avatar source={uri ? { uri } : undefined} size={size} />
+      <Avatar
+        backgroundColor={Colors.grey10}
+        source={uri ? { uri } : undefined}
+        size={size}
+      />
       {!!onUpdate && (
         <View
           center

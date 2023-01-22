@@ -1,17 +1,13 @@
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import ConnectButton from "../components/ConnectButton";
-import { useSocialProtocolGetters } from "../utils";
 
+// TODO: Add welcome text & logo
 export default function AuthScreen() {
-  const socialGetters = useSocialProtocolGetters();
-
   return (
-    <>
-      <ScrollView contentContainerStyle={styles.container}>
-        <ConnectButton label="connect" />
-      </ScrollView>
-    </>
+    <ScrollView contentContainerStyle={styles.container}>
+      <ConnectButton label="connect" />
+    </ScrollView>
   );
 }
 
