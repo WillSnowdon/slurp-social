@@ -128,13 +128,14 @@ export default function UserProfileScreen() {
           {userProfile && (
             <View>
               <Hyperlink
+                linkDefault
                 linkStyle={{
                   color: "#2980b9",
                   fontSize: 14,
                   textDecorationLine: "underline",
                 }}
               >
-                <Text>{userProfile.bio}</Text>
+                <Text>{userProfile.bio.replace(/\n/g, " ")}</Text>
               </Hyperlink>
             </View>
           )}
