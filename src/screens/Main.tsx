@@ -3,7 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React, { useContext } from "react";
 import { Colors } from "react-native-ui-lib";
-import { DataContext, useAuthorization } from "../utils";
+import { AuthedUserContext, useAuthorization } from "../utils";
 import Auth from "./Auth";
 import CreateUserScreen from "./CreateUser";
 import FeedNav from "./FeedNav";
@@ -11,7 +11,7 @@ import FeedNav from "./FeedNav";
 const Tab = createBottomTabNavigator();
 export default function MainScreen() {
   const { selectedAccount } = useAuthorization();
-  const { authedUser, loadingUser } = useContext(DataContext);
+  const { authedUser, loadingUser } = useContext(AuthedUserContext);
 
   return (
     <>

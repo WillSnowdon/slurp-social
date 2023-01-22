@@ -7,7 +7,7 @@ import { ImageOrVideo } from "react-native-image-crop-picker";
 import PostInput, { PostContext } from "../components/PostInput";
 import PostItem from "../components/PostItem";
 import {
-  DataContext,
+  AuthedUserContext,
   SlurpPost,
   SlurpUser,
   useSocialProtocolGetters,
@@ -48,7 +48,7 @@ export default function FeedScreen() {
   const [offset, setOffset] = useState(0);
   const [initialRequest, setInitialRequest] = useState(false);
   const nav = useNavigation<FeedNavProp>();
-  const authedUser = useContext(DataContext).authedUser as SlurpUser;
+  const authedUser = useContext(AuthedUserContext).authedUser as SlurpUser;
 
   const getPosts = useCallback(async () => {
     if (!protoGetters) return;

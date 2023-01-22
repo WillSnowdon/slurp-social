@@ -1,18 +1,17 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { FileUriData } from "@spling/social-protocol";
 import React, { useCallback, useContext, useState } from "react";
-import { ImageBackground, TouchableOpacity } from "react-native";
 import ImagePicker, { Image } from "react-native-image-crop-picker";
-import { Button, Colors, Incubator, View } from "react-native-ui-lib";
-import { DataContext } from "../utils";
+import { Button, Incubator, View } from "react-native-ui-lib";
+import { AuthedUserContext } from "../utils";
 import { useSplingTransact } from "../utils/transact";
+import EditableAvatar from "./EditableAvatar";
 
 export default function CreateUserForm() {
   const [userName, setUserName] = useState("");
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<Image>();
   const transact = useSplingTransact();
-  const { refreshUser } = useContext(DataContext);
+  const { updateUser } = useContext(AuthedUserContext);
 
   const handlePickAvatar = useCallback(async () => {
     try {
@@ -36,7 +35,7 @@ export default function CreateUserForm() {
   }, [setAvatar]);
 
   const handleCreateUser = useCallback(async () => {
-    await transact(async (socialProtocal) => {
+    const user = await transact(async (socialProtocal) => {
       if (!avatar) return;
 
       const file: FileUriData = {
@@ -47,44 +46,14 @@ export default function CreateUserForm() {
       return await socialProtocal.createUser(userName, file, bio);
     });
 
-    refreshUser?.();
-  }, [transact, userName, bio, avatar, refreshUser]);
+    if (user) {
+      updateUser(user);
+    }
+  }, [transact, userName, bio, avatar, updateUser]);
 
   return (
     <View center flex>
-      <TouchableOpacity
-        style={{
-          height: 200,
-          width: 200,
-          backgroundColor: Colors.grey10,
-          borderRadius: 100,
-          overflow: "hidden",
-          position: "relative",
-        }}
-        accessibilityLabel="Select Avatar"
-        onPress={handlePickAvatar}
-      >
-        <ImageBackground
-          source={avatar ? { uri: avatar.path } : undefined}
-          style={{ height: 200, width: 200 }}
-        >
-          <View center flex>
-            <MaterialCommunityIcons
-              name={avatar ? "image-edit" : "image-plus"}
-              size={80}
-              color={Colors.white}
-              style={[
-                avatar && {
-                  opacity: 0.8,
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                },
-              ]}
-            />
-          </View>
-        </ImageBackground>
-      </TouchableOpacity>
+      <EditableAvatar onUpdate={handlePickAvatar} />
       <View width={260} marginT-32>
         <Incubator.TextField
           showCharCounter

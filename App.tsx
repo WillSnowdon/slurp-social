@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Cache, SWRConfig } from "swr";
 import MainScreen from "./src/screens/Main";
-import { DataProvider } from "./src/utils";
+import { AuthedUserProvider } from "./src/utils";
 
 const DEVNET_ENDPOINT = /*#__PURE__*/ clusterApiUrl("mainnet-beta");
 
@@ -72,9 +72,9 @@ export default function App() {
           }
         >
           <SWRConfig value={{ provider: asyncStorageProvider }}>
-            <DataProvider>
+            <AuthedUserProvider>
               <MainScreen />
-            </DataProvider>
+            </AuthedUserProvider>
           </SWRConfig>
         </Suspense>
       </SafeAreaView>

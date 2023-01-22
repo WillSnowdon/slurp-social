@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
 import UiAvatar from "react-native-ui-lib/avatar";
-import { DataContext } from "../utils";
+import { AuthedUserContext } from "../utils";
 
 export default function AuthedUserAvatar(props: { size: number }) {
-  const { authedUser } = useContext(DataContext);
+  const { authedUser } = useContext(AuthedUserContext);
 
   return (
     <>
