@@ -1,11 +1,5 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import React, {
-  forwardRef,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-} from "react";
+import React, { forwardRef, useCallback, useRef, useState } from "react";
 import { SafeAreaView, TextInput, TouchableOpacity } from "react-native";
 import ImagePicker, { ImageOrVideo } from "react-native-image-crop-picker";
 import Modal from "react-native-modal";
@@ -23,14 +17,11 @@ import AuthedUserAvatar from "./AuthedUserAvatar";
 const getTags = (text: string): string[] =>
   text.match(/(#+[a-zA-Z0-9(_)]{1,})/g) ?? [];
 
-export type PostInputProps = {
+export type PostProps = {
   onPost?: (text: string, image?: ImageOrVideo) => void;
 };
 
-export const PostContext = React.createContext<PostInputProps>({});
-
-export default forwardRef(() => {
-  const { onPost } = useContext(PostContext);
+export default forwardRef(({ onPost }: PostProps, _ref) => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = useCallback(() => {
     setShowModal(false);

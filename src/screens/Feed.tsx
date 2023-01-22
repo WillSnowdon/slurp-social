@@ -4,7 +4,8 @@ import { FileUriData, Order_By, Post } from "@spling/social-protocol";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList } from "react-native";
 import { ImageOrVideo } from "react-native-image-crop-picker";
-import PostInput, { PostContext } from "../components/PostInput";
+import { View } from "react-native-ui-lib";
+import PostInput from "../components/PostInput";
 import PostItem from "../components/PostItem";
 import {
   AuthedUserContext,
@@ -17,6 +18,13 @@ import { FeedNavProp } from "./FeedNav.types";
 
 const LIMIT = 10;
 const MAIN_FEED_GROUP_ID = 10;
+
+export type PostContext = {
+  loading?: boolean;
+  onPost?: (text: string, image?: ImageOrVideo) => void;
+};
+
+export const PostContext = React.createContext<PostContext>({});
 
 const getAllSlurpPosts = async (
   protoGetters: ReturnType<typeof useSocialProtocolGetters>,
@@ -126,28 +134,44 @@ export default function FeedScreen() {
   }, [protoGetters, initialRequest]);
 
   return (
-    <PostContext.Provider value={{ onPost: addPost }}>
+    <PostContext.Provider value={{ onPost: addPost, loading }}>
       <FlatList
-        ListHeaderComponent={PostInput}
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
         stickyHeaderIndices={[0]}
         style={{ flex: 1 }}
         data={posts}
         keyExtractor={({ postId }) => postId.toString()}
-        renderItem={({ item, index }) => {
-          return (
-            <>
-              <PostItem
-                post={item}
-                onLikePost={likePost}
-                onCommentPress={handleViewComments}
-                onItemPress={handleViewComments}
-                onAvatarPress={handleAvatarPress}
-              />
-              {loading && index === posts.length - 1 && <ActivityIndicator />}
-            </>
-          );
-        }}
+        renderItem={({ item }) => (
+          <PostItem
+            post={item}
+            onLikePost={likePost}
+            onCommentPress={handleViewComments}
+            onItemPress={handleViewComments}
+            onAvatarPress={handleAvatarPress}
+          />
+        )}
       />
     </PostContext.Provider>
   );
 }
+
+const ListHeader = () => {
+  const { onPost } = useContext(PostContext);
+
+  return <PostInput onPost={onPost} />;
+};
+
+const ListFooter = () => {
+  const { loading } = useContext(PostContext);
+
+  return (
+    <>
+      {loading && (
+        <View paddingV-24>
+          <ActivityIndicator />
+        </View>
+      )}
+    </>
+  );
+};
