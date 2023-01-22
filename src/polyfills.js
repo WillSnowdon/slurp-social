@@ -5,5 +5,3 @@ import "react-native-url-polyfill/auto";
 global.Buffer = Buffer;
 const process = require("process");
 global.process = process;
-
-import "fast-text-encoding";
