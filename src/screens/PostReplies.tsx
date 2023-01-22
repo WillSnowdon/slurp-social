@@ -1,5 +1,5 @@
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { Reply } from "@spling/social-protocol";
+import { Order_By, Reply } from "@spling/social-protocol";
 import React, {
   FunctionComponent,
   useCallback,
@@ -78,7 +78,7 @@ export default function PostReplies() {
         });
 
         setReplies((replies) => {
-          return [reply, ...replies];
+          return [...replies, reply];
         });
       } catch {
         // TODO: handle reply error
@@ -93,7 +93,12 @@ export default function PostReplies() {
     (async () => {
       try {
         setLoadingReplies(true);
-        const replies = await protoGetters?.getAllPostReplies(post.postId);
+        const replies = await protoGetters?.getAllPostReplies(
+          post.postId,
+          100,
+          0,
+          Order_By.Asc
+        );
         setReplies(replies);
       } finally {
         setLoadingReplies(false);
@@ -115,10 +120,8 @@ export default function PostReplies() {
         style={{ flex: 1 }}
         data={replies}
         ListFooterComponent={Footer}
-        keyExtractor={({ postId }) => postId.toString()}
-        renderItem={({ item }) => {
-          return <ReplyItem reply={item} />;
-        }}
+        keyExtractor={({ userId, timestamp }) => `${userId}${timestamp}`}
+        renderItem={({ item }) => <ReplyItem reply={item} />}
       />
 
       <ReplyModal
