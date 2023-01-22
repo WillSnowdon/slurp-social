@@ -11,6 +11,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import Hyperlink from "react-native-hyperlink";
 import Modal from "react-native-modal";
 import {
   Colors,
@@ -126,7 +127,15 @@ export default function UserProfileScreen() {
 
           {userProfile && (
             <View>
-              <Text>{userProfile.bio}</Text>
+              <Hyperlink
+                linkStyle={{
+                  color: "#2980b9",
+                  fontSize: 14,
+                  textDecorationLine: "underline",
+                }}
+              >
+                <Text>{userProfile.bio}</Text>
+              </Hyperlink>
             </View>
           )}
         </View>
