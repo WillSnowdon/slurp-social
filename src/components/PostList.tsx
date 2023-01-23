@@ -1,13 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
-import { transact } from "@solana-mobile/mobile-wallet-adapter-protocol-web3js";
-import { useConnection } from "@solana/wallet-adapter-react";
-import {
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import { FileUriData, Order_By, Post } from "@spling/social-protocol";
 import React, {
   useCallback,
@@ -20,7 +13,6 @@ import { ActivityIndicator, FlatList, FlatListProps } from "react-native";
 import { ImageOrVideo } from "react-native-image-crop-picker";
 import Modal from "react-native-modal";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useToast } from "react-native-toast-notifications";
 import {
   ActionSheet,
   Colors,
@@ -34,11 +26,11 @@ import {
   navEventEmitter,
   SlurpPost,
   SlurpUser,
-  useAuthorization,
   useGuardedCallback,
   useSocialProtocolGetters,
 } from "../utils";
 import { useSplingTransact } from "../utils/transact";
+import useTransferTransactions from "../utils/useTransferTransactions";
 import PostItem from "./PostItem";
 import TipForm from "./TipForm";
 
@@ -106,7 +98,7 @@ export type PostListProps = {
 
 export default function PostList({ userId, ...listProps }: PostListProps) {
   const splingTransact = useSplingTransact();
-  const { authorizeSession } = useAuthorization();
+  const { tipUserSol } = useTransferTransactions();
   const protoGetters = useSocialProtocolGetters();
   const [posts, setPosts] = useState<SlurpPost[]>([]);
   const [loading, setLoading] = useState(false);
@@ -117,9 +109,7 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
   const nav = useNavigation<FeedNavProp>();
   const authedUser = useContext(AuthedUserContext).authedUser as SlurpUser;
   const [actionablePost, setActionablePost] = useState<SlurpPost>();
-  const { connection } = useConnection();
   const [tipUser, setTipUser] = useState<SlurpPost["user"]>();
-  const toast = useToast();
 
   useEffect(() => {
     const handler = () => {
@@ -160,35 +150,6 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
     offset,
     loading,
   ]);
-
-  const handleTipUserSol = useGuardedCallback(
-    async (to: PublicKey, nickname: string, solAmount: number) => {
-      const txIds = await transact(async (wallet) => {
-        await authorizeSession(wallet);
-        const fromPubkey = new PublicKey(authedUser.publicKey);
-        const transferTransaction = new Transaction().add(
-          SystemProgram.transfer({
-            fromPubkey,
-            toPubkey: to,
-            lamports: solAmount * LAMPORTS_PER_SOL,
-          })
-        );
-        const blockhash = await connection.getLatestBlockhash("finalized");
-        transferTransaction.recentBlockhash = blockhash.blockhash;
-        transferTransaction.feePayer = fromPubkey;
-        return await wallet.signAndSendTransactions({
-          transactions: [transferTransaction],
-        });
-      });
-
-      console.log(
-        `tipped ${solAmount} SOL to ${to.toString()} - ${txIds.toString()}`
-      );
-
-      toast.show(`Tipped ${nickname} ${solAmount}SOL!`, { type: "success" });
-    },
-    [connection, authedUser, toast, authorizeSession]
-  );
 
   const handleDismissTipModal = useCallback(() => {
     setTipUser(undefined);
@@ -348,7 +309,7 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
                     if (!tipUser) return;
 
                     if (tokenOption.name === "SOL") {
-                      handleTipUserSol(
+                      tipUserSol(
                         new PublicKey(tipUser.publicKey),
                         tipUser.nickname,
                         amount
