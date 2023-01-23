@@ -1,7 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
 import { PublicKey } from "@solana/web3.js";
 import { FileUriData, Order_By, Post } from "@spling/social-protocol";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { ActivityIndicator, FlatList } from "react-native";
 import { ImageOrVideo } from "react-native-image-crop-picker";
 import { View } from "react-native-ui-lib";
@@ -9,6 +15,7 @@ import PostInput from "../components/PostInput";
 import PostItem from "../components/PostItem";
 import {
   AuthedUserContext,
+  navEventEmitter,
   SlurpPost,
   SlurpUser,
   useSocialProtocolGetters,
@@ -53,39 +60,61 @@ export default function FeedScreen() {
   const protoGetters = useSocialProtocolGetters();
   const [posts, setPosts] = useState<SlurpPost[]>([]);
   const [loading, setLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
+  const offset = useRef(0);
+  const [refreshing, setRefreshing] = useState(false);
   const [initialRequest, setInitialRequest] = useState(false);
+  const listRef = useRef<FlatList>(null);
   const nav = useNavigation<FeedNavProp>();
   const authedUser = useContext(AuthedUserContext).authedUser as SlurpUser;
+
+  useEffect(() => {
+    const handler = () => {
+      listRef.current?.scrollToIndex({ index: 0 });
+    };
+    navEventEmitter.addListener("homeTabPress", handler);
+
+    return () => {
+      navEventEmitter.removeListener("homeTabPres", handler);
+    };
+  }, []);
+
   const getPosts = useCallback(async () => {
-    if (!protoGetters) return;
+    if (!protoGetters || loading || offset.current < 0) return;
     try {
       setLoading(true);
       const fetchedPosts = await getAllSlurpPosts(
         protoGetters,
-        offset,
+        offset.current,
         authedUser
       );
 
-      setPosts((posts) => posts.concat(fetchedPosts));
+      setPosts((posts) =>
+        offset.current === 0 ? fetchedPosts : posts.concat(fetchedPosts)
+      );
+      offset.current =
+        fetchedPosts.length < LIMIT ? -1 : offset.current + LIMIT;
     } catch (e) {
       console.log(e);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  }, [protoGetters, setLoading, setPosts, offset]);
+  }, [protoGetters, setLoading, setRefreshing, setPosts, offset, loading]);
 
   const addPost = useCallback(
     async (text: string, media?: ImageOrVideo) => {
-      const fileUriData: FileUriData | null = media
-        ? {
-            size: media.size,
-            type: media.mime,
-            uri: media.path,
-          }
-        : null;
+      const fileUriData: FileUriData | undefined = media && {
+        size: media.size,
+        type: media.mime,
+        uri: media.path,
+      };
       const post = (await transact(async (socialProto) => {
-        return await socialProto.createPost(10, "", text, fileUriData);
+        return await socialProto.createPost(
+          10,
+          "",
+          text,
+          fileUriData ? [fileUriData] : null
+        );
       })) as Post;
 
       setPosts((posts) => {
@@ -136,11 +165,19 @@ export default function FeedScreen() {
   return (
     <PostContext.Provider value={{ onPost: addPost, loading }}>
       <FlatList
+        ref={listRef}
         ListHeaderComponent={ListHeader}
         ListFooterComponent={ListFooter}
         stickyHeaderIndices={[0]}
         style={{ flex: 1 }}
+        onRefresh={() => {
+          offset.current = 0;
+          setRefreshing(true);
+          setTimeout(() => getPosts(), 0);
+        }}
+        refreshing={refreshing}
         data={posts}
+        onEndReached={getPosts}
         keyExtractor={({ postId }) => postId.toString()}
         renderItem={({ item }) => (
           <PostItem

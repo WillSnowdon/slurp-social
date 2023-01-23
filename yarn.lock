@@ -2063,10 +2063,10 @@
     rpc-websockets "^7.5.0"
     superstruct "^0.14.2"
 
-"@spling/social-protocol@1.5.4":
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/@spling/social-protocol/-/social-protocol-1.5.4.tgz#89243e12ff9e1f4399b68f4039829ed5a0c22ccf"
-  integrity sha512-y79WOeu1N3/mVFNrqgOg/Drvw7roacByydbztVwGsyXOgjMUcNNvf99pyRk7ecEJNspjjRWJp9RpHPQrRG/02A==
+"@spling/social-protocol@1.5.5":
+  version "1.5.5"
+  resolved "https://registry.yarnpkg.com/@spling/social-protocol/-/social-protocol-1.5.5.tgz#f56f1cb66234b05fff933b61b703ae8a847ded7f"
+  integrity sha512-uIdkEZC6lDRdnDz5cbsHXHH5liS94YEuiga77aMhYQTPBDeekh2XVJgn6RG+JB5Q4nM5fguDYbaXxHQ/X+depg==
   dependencies:
     "@project-serum/anchor" "^0.26.0"
     "@solana/spl-token" "^0.3.6"
@@ -3908,6 +3908,11 @@ eventemitter3@^4.0.0, eventemitter3@^4.0.7:
   version "4.0.7"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-4.0.7.tgz#2de9b68f6528d5644ef5c59526a1b4a07306169f"
   integrity sha512-8guHBZCwKnFhYdHr2ysuRWErTwhoN2X8XELRlrRwpmfeY2jjuUN4taQMsULKUVo1K4DvZl+0pgfyoysHxvmvEw==
+
+eventemitter3@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-5.0.0.tgz#084eb7f5b5388df1451e63f4c2aafd71b217ccb3"
+  integrity sha512-riuVbElZZNXLeLEoprfNYoDSwTBRR44X3mnhdI1YcnENpWTCsTTVZ2zFuqQcpoyqPQIUXdiPEU0ECAq0KQRaHg==
 
 events@^1.0.0:
   version "1.1.1"

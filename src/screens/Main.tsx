@@ -1,11 +1,12 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React, { useContext } from "react";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, TouchableOpacity } from "react-native";
 import { Colors, Text, View } from "react-native-ui-lib";
 import {
   AuthedUserContext,
   AuthedUserProvider,
+  navEventEmitter,
   useAuthorization,
 } from "../utils";
 import Auth from "./Auth";
@@ -49,8 +50,17 @@ function ConnectedView() {
                   color={focused ? Colors.tabBarIconActive : Colors.tabBarIcon}
                 />
               ),
-              tabBarLabel: ({}) => null,
+              tabBarButton: (props) => (
+                <TouchableOpacity
+                  {...props}
+                  onPress={(...args) => {
+                    props.onPress?.(...args);
+                    navEventEmitter.emit("homeTabPress");
+                  }}
+                />
+              ),
               tabBarAccessibilityLabel: "Feed",
+              tabBarShowLabel: false,
               tabBarStyle: {
                 backgroundColor: Colors.tabBarBG,
               },
