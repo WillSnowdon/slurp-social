@@ -42,14 +42,14 @@ const toSlurpPost = (post: Post, authedUser: SlurpUser): SlurpPost => ({
 });
 const getAllPostsByUser = async (
   protoGetters: ReturnType<typeof useSocialProtocolGetters>,
-  user: SlurpUser,
+  userId: number,
   offset: number,
   authedUser: SlurpUser
 ): Promise<SlurpPost[]> => {
   if (!protoGetters) return Promise.reject();
 
   const fetchedPosts = await protoGetters.getAllPostsByUserId(
-    user.userId,
+    userId,
     LIMIT,
     offset,
     Order_By.Desc
@@ -79,13 +79,13 @@ export type PostListProps = {
   /**
    * If provided it will look up posts for user otherwise default app group it
    */
-  user?: SlurpUser;
+  userId?: number;
 } & Pick<
   FlatListProps<SlurpPost>,
   "ListHeaderComponent" | "stickyHeaderIndices"
 >;
 
-export default function PostList({ user, ...listProps }: PostListProps) {
+export default function PostList({ userId, ...listProps }: PostListProps) {
   const transact = useSplingTransact();
   const protoGetters = useSocialProtocolGetters();
   const [posts, setPosts] = useState<SlurpPost[]>([]);
@@ -113,8 +113,8 @@ export default function PostList({ user, ...listProps }: PostListProps) {
     if (!protoGetters || loading || offset.current < 0) return;
     try {
       setLoading(true);
-      const fetchedPosts = await (user
-        ? getAllPostsByUser(protoGetters, user, offset.current, authedUser)
+      const fetchedPosts = await (typeof userId !== "undefined"
+        ? getAllPostsByUser(protoGetters, userId, offset.current, authedUser)
         : getAllSlurpPosts(protoGetters, offset.current, authedUser));
 
       setPosts((posts) =>
@@ -133,7 +133,7 @@ export default function PostList({ user, ...listProps }: PostListProps) {
     setLoading,
     setRefreshing,
     setPosts,
-    user,
+    userId,
     offset,
     loading,
   ]);

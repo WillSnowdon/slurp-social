@@ -13,17 +13,13 @@ import {
 } from "react-native";
 import Hyperlink from "react-native-hyperlink";
 import Modal from "react-native-modal";
-import {
-  Colors,
-  KeyboardAwareScrollView,
-  Text,
-  View,
-} from "react-native-ui-lib";
+import { Colors, Text, View } from "react-native-ui-lib";
 import useSWR from "swr";
 import EditableAvatar from "../components/EditableAvatar";
 import EditProfileForm, {
   EditProfileFormData,
 } from "../components/EditProfileForm";
+import PostList from "../components/PostList";
 import {
   abbreviatedKey,
   AuthedUserContext,
@@ -33,6 +29,20 @@ import {
 import { useSplingTransact } from "../utils/transact";
 
 export default function UserProfileScreen() {
+  const {
+    params: { post },
+  } = useRoute<RouteProp<{ params: { post: SlurpPost } }>>();
+
+  return <PostList userId={post.userId} ListHeaderComponent={ProfileHeader} />;
+}
+
+const styles = StyleSheet.create({
+  nickname: {
+    fontSize: 30,
+  },
+});
+
+const ProfileHeader = () => {
   const {
     params: {
       post: { user },
@@ -85,63 +95,56 @@ export default function UserProfileScreen() {
     },
     [transact, updateUser, handleModalDismiss, userRequest.mutate]
   );
-
   return (
-    <View bg-mainBG flex>
-      <KeyboardAwareScrollView>
-        <ImageBackground
-          style={{ backgroundColor: Colors.bannerBG, position: "relative" }}
-          source={{ uri: userProfile?.banner || undefined }}
-        >
-          {isProfileAuthedUser && (
-            <TouchableOpacity
-              style={{ position: "absolute", top: 16, right: 16 }}
-              accessibilityLabel="Edit your profile"
-              onPress={handleModalOpen}
-            >
-              <MaterialCommunityIcons
-                name="circle-edit-outline"
-                size={50}
-                color={Colors.white}
-              />
-            </TouchableOpacity>
-          )}
-          <View height={200} center>
-            <EditableAvatar
-              uri={userProfile?.avatar ?? user.avatar}
-              size={100}
+    <>
+      <ImageBackground
+        style={{ backgroundColor: Colors.bannerBG, position: "relative" }}
+        source={{ uri: userProfile?.banner || undefined }}
+      >
+        {isProfileAuthedUser && (
+          <TouchableOpacity
+            style={{ position: "absolute", top: 16, right: 16 }}
+            accessibilityLabel="Edit your profile"
+            onPress={handleModalOpen}
+          >
+            <MaterialCommunityIcons
+              name="circle-edit-outline"
+              size={50}
+              color={Colors.white}
             />
-          </View>
-        </ImageBackground>
-        <View marginT-24 paddingH-16>
-          <Text style={styles.nickname}>
-            {userProfile?.nickname ?? user.nickname}
-          </Text>
-          <Text>{abbreviatedKey(user.publicKey)}</Text>
-
-          {userRequest.isLoading && (
-            <View marginT-16 center>
-              <ActivityIndicator />
-            </View>
-          )}
-
-          {userProfile && (
-            <View>
-              <Hyperlink
-                linkDefault
-                linkStyle={{
-                  color: Colors.hyperlink,
-                  fontSize: 14,
-                  textDecorationLine: "underline",
-                }}
-              >
-                <Text>{userProfile.bio.replace(/\n/g, " ")}</Text>
-              </Hyperlink>
-            </View>
-          )}
+          </TouchableOpacity>
+        )}
+        <View height={200} center>
+          <EditableAvatar uri={userProfile?.avatar ?? user.avatar} size={100} />
         </View>
-      </KeyboardAwareScrollView>
+      </ImageBackground>
+      <View marginT-24 paddingH-16>
+        <Text style={styles.nickname}>
+          {userProfile?.nickname ?? user.nickname}
+        </Text>
+        <Text>{abbreviatedKey(user.publicKey)}</Text>
 
+        {userRequest.isLoading && (
+          <View marginT-16 center>
+            <ActivityIndicator />
+          </View>
+        )}
+
+        {userProfile && (
+          <View>
+            <Hyperlink
+              linkDefault
+              linkStyle={{
+                color: Colors.hyperlink,
+                fontSize: 14,
+                textDecorationLine: "underline",
+              }}
+            >
+              <Text>{userProfile.bio.replace(/\n/g, " ")}</Text>
+            </Hyperlink>
+          </View>
+        )}
+      </View>
       <Modal
         isVisible={showEditModal}
         onBackdropPress={handleModalDismiss}
@@ -167,12 +170,6 @@ export default function UserProfileScreen() {
           </SafeAreaView>
         </View>
       </Modal>
-    </View>
+    </>
   );
-}
-
-const styles = StyleSheet.create({
-  nickname: {
-    fontSize: 30,
-  },
-});
+};
