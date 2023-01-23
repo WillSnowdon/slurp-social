@@ -8,7 +8,7 @@ import { useSocialProtocolGetters } from "./useSocialProtocolGetters";
 const toSlurpUser = (user: User | null): SlurpUser | null =>
   user && { ...user, publicKey: user.publicKey.toString() };
 
-type AppData = {
+type AuthedUserContextConfig = {
   authedUser?: SlurpUser | null;
   shouldCreateUser?: boolean;
   loadingUser?: boolean;
@@ -16,7 +16,9 @@ type AppData = {
   refreshUser?: () => Promise<SlurpUser | null>;
 };
 
-export const AuthedUserContext = React.createContext<AppData>({});
+export const AuthedUserContext = React.createContext<AuthedUserContextConfig>(
+  {}
+);
 
 export const AuthedUserProvider: FunctionComponent<PropsWithChildren> = ({
   children,

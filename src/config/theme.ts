@@ -6,6 +6,7 @@ Colors.loadColors({
   buttonBG: primary,
   mainBG: "#fff",
   primaryBG: primary,
+  primary,
   postBG: "#fff",
   replyBG: "#fafafa",
   postInputModalBG: "#fff",

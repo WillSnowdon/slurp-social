@@ -1,5 +1,13 @@
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
-import { PublicKey } from "@solana/web3.js";
+import { transact } from "@solana-mobile/mobile-wallet-adapter-protocol-web3js";
+import { useConnection } from "@solana/wallet-adapter-react";
+import {
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from "@solana/web3.js";
 import { FileUriData, Order_By, Post } from "@spling/social-protocol";
 import React, {
   useCallback,
@@ -10,18 +18,28 @@ import React, {
 } from "react";
 import { ActivityIndicator, FlatList, FlatListProps } from "react-native";
 import { ImageOrVideo } from "react-native-image-crop-picker";
-import { ActionSheet, View } from "react-native-ui-lib";
+import Modal from "react-native-modal";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  ActionSheet,
+  Colors,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native-ui-lib";
 import { FeedNavProp } from "../screens/FeedNav.types";
 import {
   AuthedUserContext,
   navEventEmitter,
   SlurpPost,
   SlurpUser,
+  useAuthorization,
   useGuardedCallback,
   useSocialProtocolGetters,
 } from "../utils";
 import { useSplingTransact } from "../utils/transact";
 import PostItem from "./PostItem";
+import TipForm from "./TipForm";
 
 const LIMIT = 10;
 const MAIN_FEED_GROUP_ID = 10;
@@ -86,7 +104,8 @@ export type PostListProps = {
 >;
 
 export default function PostList({ userId, ...listProps }: PostListProps) {
-  const transact = useSplingTransact();
+  const splingTransact = useSplingTransact();
+  const { authorizeSession } = useAuthorization();
   const protoGetters = useSocialProtocolGetters();
   const [posts, setPosts] = useState<SlurpPost[]>([]);
   const [loading, setLoading] = useState(false);
@@ -97,6 +116,8 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
   const nav = useNavigation<FeedNavProp>();
   const authedUser = useContext(AuthedUserContext).authedUser as SlurpUser;
   const [actionablePost, setActionablePost] = useState<SlurpPost>();
+  const { connection } = useConnection();
+  const [tipUser, setTipUser] = useState<SlurpPost["user"]>();
 
   useEffect(() => {
     const handler = () => {
@@ -138,6 +159,43 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
     loading,
   ]);
 
+  const handleTipUserSol = useGuardedCallback(
+    (to: PublicKey, solAmount: number) => {
+      transact(async (wallet) => {
+        await authorizeSession(wallet);
+        const fromPubkey = new PublicKey(authedUser.publicKey);
+        const transferTransaction = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey,
+            toPubkey: to,
+            lamports: solAmount * LAMPORTS_PER_SOL,
+          })
+        );
+        const blockhash = await connection.getLatestBlockhash("finalized");
+        transferTransaction.recentBlockhash = blockhash.blockhash;
+        transferTransaction.feePayer = fromPubkey;
+        const txIds = await wallet.signAndSendTransactions({
+          transactions: [transferTransaction],
+        });
+        console.log(
+          `tipped ${solAmount} SOL to ${to.toString()} - ${txIds.toString()}`
+        );
+      });
+    },
+    [connection, authedUser, authorizeSession]
+  );
+
+  const handleDismissTipModal = useCallback(() => {
+    setTipUser(undefined);
+  }, [setTipUser]);
+
+  const handleOpenTipModal = useCallback(
+    (post: SlurpPost) => {
+      setTipUser(post.user);
+    },
+    [setTipUser]
+  );
+
   const addPost = useGuardedCallback(
     async (text: string, media?: ImageOrVideo) => {
       const fileUriData: FileUriData | undefined = media && {
@@ -145,7 +203,7 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
         type: media.mime,
         uri: media.path,
       };
-      const post = (await transact(async (socialProto) => {
+      const post = (await splingTransact(async (socialProto) => {
         return await socialProto.createPost(
           10,
           "",
@@ -167,16 +225,16 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
         ];
       });
     },
-    [transact]
+    [splingTransact]
   );
 
   const likePost = useGuardedCallback(
     (post: SlurpPost) => {
-      transact(async (socialProto) => {
+      splingTransact(async (socialProto) => {
         await socialProto.likePost(new PublicKey(post.publicKey));
       });
     },
-    [transact]
+    [splingTransact]
   );
 
   const handleViewComments = useCallback(
@@ -188,7 +246,7 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
 
   const handleDeletePost = useGuardedCallback(
     async (actionablePost?: SlurpPost) => {
-      await transact(async (socialProtocol) => {
+      await splingTransact(async (socialProtocol) => {
         if (!actionablePost) return;
         console.log(`deleting ${actionablePost.publicKey}`);
         await socialProtocol.deletePost(
@@ -241,6 +299,7 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
             onItemPress={handleViewComments}
             onAvatarPress={handleAvatarPress}
             onMenuPress={setActionablePost}
+            onTipUser={handleOpenTipModal}
           />
         )}
       />
@@ -257,6 +316,49 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
           },
         ]}
       />
+
+      <Modal
+        isVisible={!!tipUser}
+        onBackdropPress={handleDismissTipModal}
+        onBackButtonPress={handleDismissTipModal}
+      >
+        <SafeAreaView style={{ flex: 1 }}>
+          <View flex centerV>
+            <View bg-postInputModalBG padding-24 br30>
+              <View row centerV marginB-24>
+                <Text flex style={{ fontSize: 24 }} color={Colors.primary}>
+                  Tip {tipUser?.nickname}
+                </Text>
+
+                <TouchableOpacity
+                  onPress={handleDismissTipModal}
+                  accessibilityLabel="Close Modal"
+                >
+                  <MaterialCommunityIcons name="close" size={32} />
+                </TouchableOpacity>
+              </View>
+              <View paddingT-8>
+                <TipForm
+                  onSubmit={(tokenOption, amount) => {
+                    if (!tipUser) return;
+
+                    if (tokenOption.name === "SOL") {
+                      handleTipUserSol(
+                        new PublicKey(tipUser.publicKey),
+                        amount
+                      );
+
+                      setTipUser(undefined);
+                    } else {
+                      // TODO: SPL token transfer
+                    }
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </PostListContext.Provider>
   );
 }

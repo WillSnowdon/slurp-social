@@ -1,7 +1,4 @@
-import {
-  default as MaterialCommunityIcons,
-  default as MaterialIcons,
-} from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { formatDistance } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import React, { useEffect, useRef, useState } from "react";
@@ -13,23 +10,23 @@ import { SlurpPost } from "../utils";
 export type PostItemProps = {
   post: SlurpPost;
   marginV?: boolean;
-  hideLikes?: boolean;
   onItemPress?: (post: SlurpPost) => void;
-  onCommentPress: (post: SlurpPost) => void;
-  onLikePost: (post: SlurpPost) => void;
+  onCommentPress?: (post: SlurpPost) => void;
+  onLikePost?: (post: SlurpPost) => void;
   onMenuPress?: (post?: SlurpPost) => void;
   onAvatarPress: (post: SlurpPost) => void;
+  onTipUser?: (post: SlurpPost) => void;
 };
 
 export default ({
   post,
-  hideLikes,
   marginV = true,
   onAvatarPress,
   onCommentPress,
   onItemPress,
   onMenuPress,
   onLikePost,
+  onTipUser,
 }: PostItemProps) => {
   const isDark = Colors.getScheme() === "dark";
   const imageUri = post.media?.[0]?.file;
@@ -123,11 +120,14 @@ export default ({
             </View>
           </View>
           {/* Actions */}
-          <View row paddingT-8>
-            {!hideLikes && (
+          <View row paddingT-8 centerV>
+            {onLikePost && (
               <View row centerV style={styles.action}>
-                <TouchableOpacity onPress={() => onLikePost(post)}>
-                  <MaterialIcons
+                <TouchableOpacity
+                  onPress={() => onLikePost(post)}
+                  accessibilityLabel="Like Post"
+                >
+                  <MaterialCommunityIcons
                     color={post.liked ? Colors.heart : Colors.lightIcon}
                     name={post.liked ? "heart" : "heart-outline"}
                     size={20}
@@ -136,15 +136,32 @@ export default ({
                 <Text style={styles.likesText}>{post.likes.length}</Text>
               </View>
             )}
-            <View style={styles.action}>
-              <TouchableOpacity onPress={() => onCommentPress(post)}>
-                <MaterialIcons
-                  color={Colors.lightIcon}
-                  name="comment-outline"
-                  size={20}
-                />
-              </TouchableOpacity>
-            </View>
+            {onCommentPress && (
+              <View style={styles.action} accessibilityLabel="Reply to post">
+                <TouchableOpacity onPress={() => onCommentPress(post)}>
+                  <MaterialCommunityIcons
+                    color={Colors.lightIcon}
+                    name="comment-outline"
+                    size={20}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {!post.byConnectedUser && onTipUser && (
+              <View style={styles.action}>
+                <TouchableOpacity
+                  onPress={() => onTipUser(post)}
+                  accessibilityLabel="Tip Post Creator"
+                >
+                  <MaterialCommunityIcons
+                    color="#afd9af"
+                    name="cash"
+                    size={24}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </TouchableOpacity>

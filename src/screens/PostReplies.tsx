@@ -32,11 +32,8 @@ const PostWithContext = () => {
     <>
       {post && (
         <PostItem
-          // Hide until find time to implement
-          hideLikes
           post={post}
           marginV={false}
-          onLikePost={() => {}}
           onCommentPress={(post) => onPressReply?.(post)}
           onAvatarPress={() => navigation.navigate("UserProfile", { post })}
         />
