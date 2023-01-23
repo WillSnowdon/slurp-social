@@ -8,6 +8,7 @@ export function useSocialProtocolGetters():
       | "getUserByPublicKey"
       | "getUserGroup"
       | "getAllPosts"
+      | "getAllPostsByUserId"
       | "getAllPostReplies"
     > & {
       getAuthedUser: () => ReturnType<SocialProtocol["getUserByPublicKey"]>;
