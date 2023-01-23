@@ -1,9 +1,11 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import React, { useCallback } from "react";
-import { TouchableOpacity } from "react-native";
-import ImagePicker, { Image } from "react-native-image-crop-picker";
-import { Avatar, Colors, View } from "react-native-ui-lib";
-
+import React, { useCallback, useContext, useState } from "react";
+import { Image, SafeAreaView, TouchableOpacity } from "react-native";
+import ImagePicker from "react-native-image-crop-picker";
+import Modal from "react-native-modal";
+import { ActionSheet, Avatar, Colors, View } from "react-native-ui-lib";
+import { AuthedUserContext } from "../utils";
+import NftSelect from "./NftSelect";
 export type EditableAvatarProps = {
   uri?: string | null;
   size?: number;
@@ -15,6 +17,13 @@ export default function EditableAvatar({
   uri,
   onUpdate,
 }: EditableAvatarProps) {
+  const [showActions, setShowActions] = useState(false);
+  const [showNftModal, setShowNftModal] = useState(false);
+  const { authedUser } = useContext(AuthedUserContext);
+
+  const hideModal = () => {
+    setShowNftModal(false);
+  };
   const handlePickAvatar = useCallback(async () => {
     try {
       const pickedImage = await ImagePicker.openPicker({
@@ -47,7 +56,7 @@ export default function EditableAvatar({
       }}
       disabled={!onUpdate}
       accessibilityLabel="Select Avatar"
-      onPress={handlePickAvatar}
+      onPress={() => setShowActions(true)}
     >
       <Avatar
         backgroundColor={Colors.grey10}
@@ -79,6 +88,52 @@ export default function EditableAvatar({
           />
         </View>
       )}
+
+      <ActionSheet
+        title="Avatar"
+        message="Select avatar option"
+        visible={showActions}
+        onDismiss={() => setShowActions(false)}
+        options={[
+          {
+            label: "Select Pic",
+            onPress: handlePickAvatar,
+          },
+          {
+            label: "Select NFT",
+            onPress: () => setShowNftModal(true),
+          },
+        ]}
+      />
+
+      <Modal
+        isVisible={showNftModal}
+        onBackdropPress={hideModal}
+        onBackButtonPress={hideModal}
+        style={{ margin: 0 }}
+      >
+        <View bg-postInputModalBG flex paddingH-24 paddingB-16>
+          <SafeAreaView style={{ flex: 1 }}>
+            <View flex paddingT-8>
+              <TouchableOpacity
+                onPress={hideModal}
+                accessibilityLabel="Close Modal"
+              >
+                <MaterialCommunityIcons name="close" size={32} />
+              </TouchableOpacity>
+              {showNftModal && authedUser && (
+                <NftSelect
+                  userPubKey={authedUser.publicKey}
+                  onSelect={async (uri) => {
+                    console.log(uri);
+                    // TODO: download file
+                  }}
+                />
+              )}
+            </View>
+          </SafeAreaView>
+        </View>
+      </Modal>
     </TouchableOpacity>
   );
 }

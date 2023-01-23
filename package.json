@@ -34,6 +34,7 @@
     "expo-standard-web-crypto": "^1.4.1",
     "expo-status-bar": "~1.4.2",
     "fast-text-encoding": "^1.0.6",
+    "fastestsmallesttextencoderdecoder": "^1.0.22",
     "js-base64": "^3.7.3",
     "lodash": "^4.17.21",
     "node-libs-react-native": "^1.2.1",

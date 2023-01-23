@@ -10,10 +10,11 @@ module.exports = {
     }),
   },
   resolver: {
-    // resolverMainFields: ["browser","react-native", "main"],
     extraNodeModules: {
       stream: require.resolve("readable-stream"),
       crypto: require.resolve("react-native-crypto"),
+      zlib: require.resolve("readable-stream"),
+      path: require.resolve("readable-stream"),
     },
   },
 };
