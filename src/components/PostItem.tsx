@@ -1,4 +1,7 @@
-import MaterialIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import {
+  default as MaterialCommunityIcons,
+  default as MaterialIcons,
+} from "@expo/vector-icons/MaterialCommunityIcons";
 import { formatDistance } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import React, { useEffect, useRef, useState } from "react";
@@ -13,6 +16,7 @@ export type PostItemProps = {
   onItemPress?: (post: SlurpPost) => void;
   onCommentPress: (post: SlurpPost) => void;
   onLikePost: (post: SlurpPost) => void;
+  onMenuPress?: (post?: SlurpPost) => void;
   onAvatarPress: (post: SlurpPost) => void;
 };
 
@@ -23,6 +27,7 @@ export default ({
   onAvatarPress,
   onCommentPress,
   onItemPress,
+  onMenuPress,
   onLikePost,
 }: PostItemProps) => {
   const isDark = Colors.getScheme() === "dark";
@@ -61,14 +66,26 @@ export default ({
         <View flex>
           <View>
             {/* Metadata */}
-            <View row spread centerV>
-              <Text>{post.user.nickname}</Text>
+            <View row centerV>
+              <Text flex>{post.user.nickname}</Text>
               <Text text100L>
                 {formatDistance(Date.now(), post.timestamp * 1000, {
                   locale: enUS,
                 })}{" "}
                 ago
               </Text>
+
+              {post.byConnectedUser && (
+                <View marginL-4>
+                  <TouchableOpacity onPress={() => onMenuPress?.(post)}>
+                    <MaterialCommunityIcons
+                      name="dots-vertical"
+                      color={Colors.lightIcon}
+                      size={18}
+                    />
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
             {/* Content */}
             <View

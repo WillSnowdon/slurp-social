@@ -5,6 +5,8 @@ import { Post, User } from "@spling/social-protocol";
  */
 export type SlurpPost = Omit<Post, "publicKey" | "user"> & {
   liked: boolean;
+
+  byConnectedUser: boolean;
   /**
    * pub key converted to string for react nav serialization
    */

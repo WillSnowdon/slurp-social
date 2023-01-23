@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import { ActivityIndicator, FlatList } from "react-native";
 import { ImageOrVideo } from "react-native-image-crop-picker";
-import { View } from "react-native-ui-lib";
+import { ActionSheet, View } from "react-native-ui-lib";
 import PostInput from "../components/PostInput";
 import PostItem from "../components/PostItem";
 import {
@@ -18,6 +18,7 @@ import {
   navEventEmitter,
   SlurpPost,
   SlurpUser,
+  useGuardedCallback,
   useSocialProtocolGetters,
 } from "../utils";
 import { useSplingTransact } from "../utils/transact";
@@ -52,6 +53,7 @@ const getAllSlurpPosts = async (
     publicKey: post.publicKey.toString(),
     user: { ...post.user, publicKey: post.user.publicKey.toString() },
     liked: post.likes.includes(authedUser.userId),
+    byConnectedUser: authedUser.userId === post.userId,
   }));
 };
 
@@ -66,6 +68,7 @@ export default function FeedScreen() {
   const listRef = useRef<FlatList>(null);
   const nav = useNavigation<FeedNavProp>();
   const authedUser = useContext(AuthedUserContext).authedUser as SlurpUser;
+  const [actionablePost, setActionablePost] = useState<SlurpPost>();
 
   useEffect(() => {
     const handler = () => {
@@ -122,6 +125,7 @@ export default function FeedScreen() {
           {
             ...post,
             user: { ...post.user, publicKey: post.user.publicKey.toString() },
+            byConnectedUser: true,
             publicKey: post.publicKey.toString(),
             liked: false,
           },
@@ -148,6 +152,14 @@ export default function FeedScreen() {
     [nav]
   );
 
+  const handleDeletePost = useGuardedCallback(async () => {
+    await transact(async (socialProtocol) => {
+      if (!actionablePost) return;
+      console.log(`deleting ${actionablePost.publicKey}`);
+      await socialProtocol.deletePost(new PublicKey(actionablePost.publicKey));
+    });
+  }, [actionablePost]);
+
   const handleAvatarPress = useCallback(
     (post: SlurpPost) => {
       nav.navigate("UserProfile", { post });
@@ -173,7 +185,7 @@ export default function FeedScreen() {
         onRefresh={() => {
           offset.current = 0;
           setRefreshing(true);
-          setTimeout(() => getPosts(), 0);
+          getPosts();
         }}
         refreshing={refreshing}
         data={posts}
@@ -186,8 +198,17 @@ export default function FeedScreen() {
             onCommentPress={handleViewComments}
             onItemPress={handleViewComments}
             onAvatarPress={handleAvatarPress}
+            onMenuPress={setActionablePost}
           />
         )}
+      />
+      <ActionSheet
+        title="Post Options"
+        message="Message goes here"
+        destructiveButtonIndex={0}
+        visible={!!actionablePost}
+        onDismiss={() => setActionablePost(undefined)}
+        options={[{ label: "Delete Post", onPress: handleDeletePost }]}
       />
     </PostContext.Provider>
   );
