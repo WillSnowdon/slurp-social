@@ -130,7 +130,7 @@ export default function UserProfileScreen() {
               <Hyperlink
                 linkDefault
                 linkStyle={{
-                  color: "#2980b9",
+                  color: Colors.hyperlink,
                   fontSize: 14,
                   textDecorationLine: "underline",
                 }}

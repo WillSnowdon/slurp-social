@@ -16,6 +16,7 @@ Colors.loadColors({
   tabBarIcon: primary,
   tabBarIconActive: primary,
   lightIcon: Colors.$textNeutralLight,
+  hyperlink: "#2980b9",
 });
 
 ThemeManager.setComponentTheme("Button", {

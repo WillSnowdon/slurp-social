@@ -116,7 +116,7 @@ export default function FeedScreen() {
           10,
           "",
           text,
-          fileUriData ? [fileUriData] : null
+          fileUriData ? [fileUriData] : []
         );
       })) as Post;
 

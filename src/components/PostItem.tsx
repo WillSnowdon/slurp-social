@@ -6,6 +6,7 @@ import { formatDistance } from "date-fns";
 import enUS from "date-fns/locale/en-US";
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View as RNView } from "react-native";
+import Hyperlink from "react-native-hyperlink";
 import { Avatar, Colors, Image, Text, View } from "react-native-ui-lib";
 import { SlurpPost } from "../utils";
 
@@ -97,7 +98,16 @@ export default ({
                 );
               }}
             >
-              <Text>{post.text}</Text>
+              <Hyperlink
+                linkDefault
+                linkStyle={{
+                  color: Colors.hyperlink,
+                  fontSize: 14,
+                  textDecorationLine: "underline",
+                }}
+              >
+                <Text>{post.text}</Text>
+              </Hyperlink>
               {imageUri && (
                 <View
                   marginT-16
