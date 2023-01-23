@@ -2,7 +2,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NavigationContainer } from "@react-navigation/native";
 import { ConnectionProvider } from "@solana/wallet-adapter-react";
-import { clusterApiUrl, PublicKey, PublicKeyInitData } from "@solana/web3.js";
+import { PublicKey, PublicKeyInitData } from "@solana/web3.js";
 import React, { Suspense } from "react";
 import { AppState, LogBox, SafeAreaView, StyleSheet } from "react-native";
 import { ToastProvider } from "react-native-toast-notifications";
@@ -10,7 +10,8 @@ import { View } from "react-native-ui-lib";
 import { Cache, SWRConfig } from "swr";
 import MainScreen from "./src/screens/Main";
 
-const MAINNET_ENDPOINT = /*#__PURE__*/ clusterApiUrl("mainnet-beta");
+const MAINNET_ENDPOINT =
+  "https://rpc.helius.xyz/?api-key=604a664f-28e3-43f5-97b2-d8ca1bdb499e";
 
 // Ignore annoying ui lib migration warnings
 LogBox.ignoreLogs([/^RNUILib/i]);

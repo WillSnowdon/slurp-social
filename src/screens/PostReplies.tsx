@@ -8,6 +8,7 @@ import React, {
   useState,
 } from "react";
 import { ActivityIndicator, FlatList } from "react-native";
+import { useToast } from "react-native-toast-notifications";
 
 import { View } from "react-native-ui-lib";
 import PostItem from "../components/PostItem";
@@ -71,6 +72,7 @@ export default function PostReplies() {
   const [loadingReplies, setLoadingReplies] = useState(true);
   const protoGetters = useSocialProtocolGetters();
   const [showReplyModal, setShowReplyModal] = useState(false);
+  const toast = useToast();
 
   const addReply = useCallback(
     async (text: string) => {
@@ -86,11 +88,13 @@ export default function PostReplies() {
             { ...reply, byConnectedUser: authedUser?.userId === reply.userId },
           ];
         });
-      } catch {
+        toast.show("Replied", { type: "success" });
+      } catch (e) {
         // TODO: handle reply error
+        console.log(e);
       }
     },
-    [transact, post, authedUser, setReplies, setShowReplyModal]
+    [transact, post, authedUser, toast, setReplies, setShowReplyModal]
   );
 
   useEffect(() => {

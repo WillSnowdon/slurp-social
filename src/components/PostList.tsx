@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import { ActivityIndicator, FlatList, FlatListProps } from "react-native";
 import { ImageOrVideo } from "react-native-image-crop-picker";
+import { useToast } from "react-native-toast-notifications";
 import { ActionSheet, View } from "react-native-ui-lib";
 import { FeedNavProp } from "../screens/FeedNav.types";
 import {
@@ -89,6 +90,7 @@ export type PostListProps = {
 export default function PostList({ userId, ...listProps }: PostListProps) {
   const splingTransact = useSplingTransact();
   const protoGetters = useSocialProtocolGetters();
+  const toast = useToast();
   const [posts, setPosts] = useState<SlurpPost[]>([]);
   const [loading, setLoading] = useState(false);
   const offset = useRef(0);
@@ -179,17 +181,38 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
           ...posts,
         ];
       });
+
+      toast.show("Slurp posted!", { type: "success" });
     },
-    [splingTransact]
+    [splingTransact, setPosts, toast]
   );
 
-  const likePost = useGuardedCallback(
-    (post: SlurpPost) => {
-      splingTransact(async (socialProto) => {
+  const handleLikePost = useGuardedCallback(
+    async (post: SlurpPost) => {
+      await splingTransact(async (socialProto) => {
         await socialProto.likePost(new PublicKey(post.publicKey));
       });
+
+      setPosts((posts) =>
+        posts.map((p) => {
+          if (post.postId === p.postId) {
+            const postLiked = p.likes.includes(authedUser.userId);
+            const likes = postLiked
+              ? p.likes.filter((userId) => userId != authedUser.userId)
+              : p.likes.concat(authedUser.userId);
+
+            return {
+              ...p,
+              likes,
+              liked: !postLiked,
+            };
+          }
+
+          return p;
+        })
+      );
     },
-    [splingTransact]
+    [splingTransact, setPosts, authedUser]
   );
 
   const handleViewComments = useCallback(
@@ -249,7 +272,7 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
         renderItem={({ item }) => (
           <PostItem
             post={item}
-            onLikePost={likePost}
+            onLikePost={handleLikePost}
             onCommentPress={handleViewComments}
             onItemPress={handleViewComments}
             onAvatarPress={handleAvatarPress}
