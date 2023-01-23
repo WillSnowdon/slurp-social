@@ -75,7 +75,7 @@ export default ({
                 ago
               </Text>
 
-              {post.byConnectedUser && (
+              {post.byConnectedUser && onMenuPress && (
                 <View marginL-4>
                   <TouchableOpacity onPress={() => onMenuPress?.(post)}>
                     <MaterialCommunityIcons
