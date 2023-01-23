@@ -1,5 +1,5 @@
 import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
-import { Order_By, Reply } from "@spling/social-protocol";
+import { Order_By } from "@spling/social-protocol";
 import React, {
   FunctionComponent,
   useCallback,
@@ -13,7 +13,12 @@ import { View } from "react-native-ui-lib";
 import PostItem from "../components/PostItem";
 import ReplyItem from "../components/ReplyItem";
 import ReplyModal from "../components/ReplyModal";
-import { SlurpPost, useSocialProtocolGetters } from "../utils";
+import {
+  AuthedUserContext,
+  SlurpPost,
+  SlurpReply,
+  useSocialProtocolGetters,
+} from "../utils";
 import { useSplingTransact } from "../utils/transact";
 import { FeedNavProp } from "./FeedNav.types";
 
@@ -61,7 +66,8 @@ export default function PostReplies() {
     params: { post },
   } = useRoute<RouteProp<{ params: { post: SlurpPost } }>>();
   const transact = useSplingTransact();
-  const [replies, setReplies] = useState<Reply[]>([]);
+  const { authedUser } = useContext(AuthedUserContext);
+  const [replies, setReplies] = useState<SlurpReply[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(true);
   const protoGetters = useSocialProtocolGetters();
   const [showReplyModal, setShowReplyModal] = useState(false);
@@ -75,13 +81,16 @@ export default function PostReplies() {
         });
 
         setReplies((replies) => {
-          return [...replies, reply];
+          return [
+            ...replies,
+            { ...reply, byConnectedUser: authedUser?.userId === reply.userId },
+          ];
         });
       } catch {
         // TODO: handle reply error
       }
     },
-    [transact, post, setReplies, setShowReplyModal]
+    [transact, post, authedUser, setReplies, setShowReplyModal]
   );
 
   useEffect(() => {

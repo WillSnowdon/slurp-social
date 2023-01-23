@@ -1,7 +1,7 @@
-import { User } from "@spling/social-protocol";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Image } from "react-native-image-crop-picker";
 import { Button, Incubator, View } from "react-native-ui-lib";
+import { SlurpUser } from "../utils";
 import EditableAvatar from "./EditableAvatar";
 
 export type EditProfileFormData = {
@@ -11,7 +11,7 @@ export type EditProfileFormData = {
 };
 
 export type EditProfileFormProps = {
-  user: User;
+  user: SlurpUser;
   onUpdate: (data: EditProfileFormData) => void;
 };
 
@@ -23,13 +23,13 @@ export default function EditProfileForm({
   const [bio, setBio] = useState(user.bio);
   const [avatar, setAvatar] = useState<Image>();
 
+  const avatarUri = useMemo(() => {
+    return avatar?.path || (user.avatar ? user.avatar : undefined);
+  }, [user, avatar]);
+
   return (
     <View center flex>
-      <EditableAvatar
-        uri={avatar?.path || user.avatar}
-        size={150}
-        onUpdate={setAvatar}
-      />
+      <EditableAvatar uri={avatarUri} size={150} onUpdate={setAvatar} />
       <View width={260} marginT-32>
         <Incubator.TextField
           showCharCounter

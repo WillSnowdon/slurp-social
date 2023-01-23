@@ -1,11 +1,12 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { formatDistance } from "date-fns";
 import enUS from "date-fns/locale/en-US";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View as RNView } from "react-native";
 import Hyperlink from "react-native-hyperlink";
 import { Avatar, Colors, Image, Text, View } from "react-native-ui-lib";
 import { SlurpPost } from "../utils";
+import AuthedUserAvatar from "./AuthedUserAvatar";
 
 export type PostItemProps = {
   post: SlurpPost;
@@ -41,6 +42,13 @@ export default ({
       setAspectRatio(height / width);
     });
   }, [imageUri]);
+
+  const avatarSrc = useMemo(() => {
+    return {
+      uri: (post.user.avatar + `?${Date.now()}`) as string,
+    };
+  }, [post.user]);
+
   return (
     <View
       paddingH-16
@@ -55,17 +63,23 @@ export default ({
         delayPressIn={1000}
       >
         <View marginR-16>
-          <Avatar
-            source={{ uri: post.user.avatar as string }}
-            onPress={() => onAvatarPress?.(post)}
-            size={32}
-          />
+          {post.byConnectedUser ? (
+            <AuthedUserAvatar onPress={() => onAvatarPress?.(post)} size={32} />
+          ) : (
+            <Avatar
+              source={avatarSrc}
+              onPress={() => onAvatarPress?.(post)}
+              size={32}
+            />
+          )}
         </View>
         <View flex>
           <View>
             {/* Metadata */}
             <View row centerV>
-              <Text flex>{post.user.nickname}</Text>
+              <Text flex color={Colors.nickname} style={{ fontWeight: "700" }}>
+                {post.user.nickname}
+              </Text>
               <Text text100L>
                 {formatDistance(Date.now(), post.timestamp * 1000, {
                   locale: enUS,

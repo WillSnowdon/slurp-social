@@ -1,12 +1,19 @@
-import { Reply } from "@spling/social-protocol";
 import { formatDistance } from "date-fns";
 import enUS from "date-fns/locale/en-US";
-import React from "react";
+import React, { useMemo } from "react";
 import { StyleSheet } from "react-native";
 import { Avatar, Colors, Text, View } from "react-native-ui-lib";
+import { SlurpReply } from "../utils";
+import AuthedUserAvatar from "./AuthedUserAvatar";
 
-export default ({ reply }: { reply: Reply }) => {
+export default ({ reply }: { reply: SlurpReply }) => {
   const isDark = Colors.getScheme() === "dark";
+
+  const avatarSrc = useMemo(() => {
+    return {
+      uri: reply.user.avatar ? reply.user.avatar + `?${Date.now()}` : undefined,
+    };
+  }, [reply.user]);
 
   return (
     <View
@@ -17,13 +24,19 @@ export default ({ reply }: { reply: Reply }) => {
       style={isDark ? styles.darkTheme : styles.lightTheme}
     >
       <View marginR-16>
-        <Avatar source={{ uri: reply.user.avatar as string }} size={32} />
+        {reply.byConnectedUser ? (
+          <AuthedUserAvatar size={32} />
+        ) : (
+          <Avatar source={avatarSrc} size={32} />
+        )}
       </View>
       <View flex>
         <View>
           {/* Metadata */}
           <View row spread centerV>
-            <Text>{reply.user.nickname}</Text>
+            <Text color={Colors.nickname} stle={{ fontWeight: "700" }}>
+              {reply.user.nickname}
+            </Text>
             <Text text100L>
               {formatDistance(Date.now(), reply.timestamp * 1000, {
                 locale: enUS,

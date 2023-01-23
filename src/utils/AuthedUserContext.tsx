@@ -7,7 +7,11 @@ import { useAuthorization } from "./useAuthorization";
 import { useSocialProtocolGetters } from "./useSocialProtocolGetters";
 
 const toSlurpUser = (user: User | null): SlurpUser | null =>
-  user && { ...user, publicKey: user.publicKey.toString() };
+  user && {
+    ...user,
+    avatar: user.avatar ? user.avatar + `?${Date.now()}` : null,
+    publicKey: user.publicKey.toString(),
+  };
 
 type AuthedUserContextConfig = {
   authedUser?: SlurpUser | null;

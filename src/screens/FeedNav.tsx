@@ -31,7 +31,7 @@ export default function FeedNav() {
       <Stack.Screen
         name="PostReplies"
         component={PostRepliesScreen}
-        options={{ headerTitle: "Replies" }}
+        options={{ headerTitle: "Feed" }}
       />
 
       <Stack.Screen

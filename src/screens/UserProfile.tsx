@@ -39,6 +39,7 @@ export default function UserProfileScreen() {
 const styles = StyleSheet.create({
   nickname: {
     fontSize: 30,
+    fontWeight: "700",
   },
 });
 
@@ -115,14 +116,17 @@ const ProfileHeader = () => {
           </TouchableOpacity>
         )}
         <View height={200} center>
-          <EditableAvatar uri={userProfile?.avatar ?? user.avatar} size={100} />
+          <EditableAvatar
+            uri={isProfileAuthedUser ? authedUser?.avatar : user.avatar}
+            size={100}
+          />
         </View>
       </ImageBackground>
       <View marginT-24 paddingH-16>
-        <Text style={styles.nickname}>
+        <Text style={styles.nickname} color={Colors.nickname}>
           {userProfile?.nickname ?? user.nickname}
         </Text>
-        <Text>{abbreviatedKey(user.publicKey)}</Text>
+        <Text style={{ fontSize: 18 }}>{abbreviatedKey(user.publicKey)}</Text>
 
         {userRequest.isLoading && (
           <View marginT-16 center>
@@ -160,9 +164,9 @@ const ProfileHeader = () => {
               >
                 <MaterialCommunityIcons name="close" size={32} />
               </TouchableOpacity>
-              {showEditModal && userProfile && (
+              {showEditModal && authedUser && (
                 <EditProfileForm
-                  user={userProfile}
+                  user={authedUser}
                   onUpdate={handleUpdateUser}
                 />
               )}
