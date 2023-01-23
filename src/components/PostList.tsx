@@ -1,4 +1,3 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useNavigation } from "@react-navigation/native";
 import { PublicKey } from "@solana/web3.js";
 import { FileUriData, Order_By, Post } from "@spling/social-protocol";
@@ -11,15 +10,7 @@ import React, {
 } from "react";
 import { ActivityIndicator, FlatList, FlatListProps } from "react-native";
 import { ImageOrVideo } from "react-native-image-crop-picker";
-import Modal from "react-native-modal";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  ActionSheet,
-  Colors,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native-ui-lib";
+import { ActionSheet, View } from "react-native-ui-lib";
 import { FeedNavProp } from "../screens/FeedNav.types";
 import {
   AuthedUserContext,
@@ -30,9 +21,8 @@ import {
   useSocialProtocolGetters,
 } from "../utils";
 import { useSplingTransact } from "../utils/transact";
-import useTransferTransactions from "../utils/useTransferTransactions";
 import PostItem from "./PostItem";
-import TipForm from "./TipForm";
+import TipModal from "./TipModal";
 
 const LIMIT = 10;
 const MAIN_FEED_GROUP_ID = 10;
@@ -98,7 +88,6 @@ export type PostListProps = {
 
 export default function PostList({ userId, ...listProps }: PostListProps) {
   const splingTransact = useSplingTransact();
-  const { tipUserSol } = useTransferTransactions();
   const protoGetters = useSocialProtocolGetters();
   const [posts, setPosts] = useState<SlurpPost[]>([]);
   const [loading, setLoading] = useState(false);
@@ -283,49 +272,11 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
         ]}
       />
 
-      <Modal
-        isVisible={!!tipUser}
-        onBackdropPress={handleDismissTipModal}
-        onBackButtonPress={handleDismissTipModal}
-      >
-        <SafeAreaView style={{ flex: 1 }}>
-          <View flex centerV>
-            <View bg-postInputModalBG padding-24 br30>
-              <View row centerV marginB-24>
-                <Text flex style={{ fontSize: 24 }} color={Colors.primary}>
-                  Tip {tipUser?.nickname}
-                </Text>
-
-                <TouchableOpacity
-                  onPress={handleDismissTipModal}
-                  accessibilityLabel="Close Modal"
-                >
-                  <MaterialCommunityIcons name="close" size={32} />
-                </TouchableOpacity>
-              </View>
-              <View paddingT-8>
-                <TipForm
-                  onSubmit={(tokenOption, amount) => {
-                    if (!tipUser) return;
-
-                    if (tokenOption.name === "SOL") {
-                      tipUserSol(
-                        new PublicKey(tipUser.publicKey),
-                        tipUser.nickname,
-                        amount
-                      );
-
-                      setTipUser(undefined);
-                    } else {
-                      // TODO: SPL token transfer
-                    }
-                  }}
-                />
-              </View>
-            </View>
-          </View>
-        </SafeAreaView>
-      </Modal>
+      <TipModal
+        tipUser={tipUser}
+        onDone={handleDismissTipModal}
+        onDismiss={handleDismissTipModal}
+      />
     </PostListContext.Provider>
   );
 }

@@ -4,13 +4,16 @@ import { NavigationContainer } from "@react-navigation/native";
 import { ConnectionProvider } from "@solana/wallet-adapter-react";
 import { clusterApiUrl, PublicKey, PublicKeyInitData } from "@solana/web3.js";
 import React, { Suspense } from "react";
-import { AppState, SafeAreaView, StyleSheet } from "react-native";
+import { AppState, LogBox, SafeAreaView, StyleSheet } from "react-native";
 import { ToastProvider } from "react-native-toast-notifications";
 import { View } from "react-native-ui-lib";
 import { Cache, SWRConfig } from "swr";
 import MainScreen from "./src/screens/Main";
 
-const DEVNET_ENDPOINT = /*#__PURE__*/ clusterApiUrl("mainnet-beta");
+const MAINNET_ENDPOINT = /*#__PURE__*/ clusterApiUrl("mainnet-beta");
+
+// Ignore annoying ui lib migration warnings
+LogBox.ignoreLogs([/^RNUILib/i]);
 
 function cacheReviver(key: string, value: any) {
   if (key === "publicKey") {
@@ -57,7 +60,7 @@ export default function App() {
   return (
     <ConnectionProvider
       config={{ commitment: "processed" }}
-      endpoint={DEVNET_ENDPOINT}
+      endpoint={MAINNET_ENDPOINT}
     >
       <ToastProvider>
         <NavigationContainer>
