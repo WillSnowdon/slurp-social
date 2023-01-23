@@ -104,7 +104,7 @@ export default function FeedScreen() {
     }
   }, [protoGetters, setLoading, setRefreshing, setPosts, offset, loading]);
 
-  const addPost = useCallback(
+  const addPost = useGuardedCallback(
     async (text: string, media?: ImageOrVideo) => {
       const fileUriData: FileUriData | undefined = media && {
         size: media.size,
@@ -136,7 +136,7 @@ export default function FeedScreen() {
     [transact]
   );
 
-  const likePost = useCallback(
+  const likePost = useGuardedCallback(
     (post: SlurpPost) => {
       transact(async (socialProto) => {
         await socialProto.likePost(new PublicKey(post.publicKey));
@@ -152,13 +152,22 @@ export default function FeedScreen() {
     [nav]
   );
 
-  const handleDeletePost = useGuardedCallback(async () => {
-    await transact(async (socialProtocol) => {
-      if (!actionablePost) return;
-      console.log(`deleting ${actionablePost.publicKey}`);
-      await socialProtocol.deletePost(new PublicKey(actionablePost.publicKey));
-    });
-  }, [actionablePost]);
+  const handleDeletePost = useGuardedCallback(
+    async (actionablePost?: SlurpPost) => {
+      await transact(async (socialProtocol) => {
+        if (!actionablePost) return;
+        console.log(`deleting ${actionablePost.publicKey}`);
+        await socialProtocol.deletePost(
+          new PublicKey(actionablePost.publicKey)
+        );
+
+        setPosts((posts) =>
+          posts.filter((post) => post.postId !== actionablePost.postId)
+        );
+      });
+    },
+    [actionablePost, setPosts]
+  );
 
   const handleAvatarPress = useCallback(
     (post: SlurpPost) => {
@@ -208,7 +217,12 @@ export default function FeedScreen() {
         destructiveButtonIndex={0}
         visible={!!actionablePost}
         onDismiss={() => setActionablePost(undefined)}
-        options={[{ label: "Delete Post", onPress: handleDeletePost }]}
+        options={[
+          {
+            label: "Delete Post",
+            onPress: () => handleDeletePost(actionablePost),
+          },
+        ]}
       />
     </PostContext.Provider>
   );
