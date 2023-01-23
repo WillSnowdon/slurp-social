@@ -14,7 +14,7 @@ Colors.loadColors({
   tabBarBG: "white",
   postInputBG: "white",
   bannerBG: "#d1b9dd",
-  tabBarIcon: primary,
+  tabBarIcon: Colors.grey30,
   tabBarIconActive: primary,
   lightIcon: Colors.$textNeutralLight,
   hyperlink: "#2980b9",

@@ -1,28 +1,21 @@
 import React from "react";
 import { ScrollView, StyleSheet } from "react-native";
+import { View } from "react-native-ui-lib";
 import ConnectButton from "../components/ConnectButton";
 
 // TODO: Add welcome text & logo
 export default function AuthScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <ConnectButton label="connect" />
+      <View flex bg-mainBG centerV paddingH-24>
+        <ConnectButton label="connect" />
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
-  },
-  shell: {
-    height: "100%",
-  },
-  spacer: {
-    marginVertical: 16,
-    width: "100%",
-  },
-  textInput: {
-    width: "100%",
+    flex: 1,
   },
 });

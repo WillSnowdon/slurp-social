@@ -20,6 +20,7 @@ import { ActivityIndicator, FlatList, FlatListProps } from "react-native";
 import { ImageOrVideo } from "react-native-image-crop-picker";
 import Modal from "react-native-modal";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useToast } from "react-native-toast-notifications";
 import {
   ActionSheet,
   Colors,
@@ -118,6 +119,7 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
   const [actionablePost, setActionablePost] = useState<SlurpPost>();
   const { connection } = useConnection();
   const [tipUser, setTipUser] = useState<SlurpPost["user"]>();
+  const toast = useToast();
 
   useEffect(() => {
     const handler = () => {
@@ -160,8 +162,8 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
   ]);
 
   const handleTipUserSol = useGuardedCallback(
-    (to: PublicKey, solAmount: number) => {
-      transact(async (wallet) => {
+    async (to: PublicKey, nickname: string, solAmount: number) => {
+      const txIds = await transact(async (wallet) => {
         await authorizeSession(wallet);
         const fromPubkey = new PublicKey(authedUser.publicKey);
         const transferTransaction = new Transaction().add(
@@ -174,15 +176,18 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
         const blockhash = await connection.getLatestBlockhash("finalized");
         transferTransaction.recentBlockhash = blockhash.blockhash;
         transferTransaction.feePayer = fromPubkey;
-        const txIds = await wallet.signAndSendTransactions({
+        return await wallet.signAndSendTransactions({
           transactions: [transferTransaction],
         });
-        console.log(
-          `tipped ${solAmount} SOL to ${to.toString()} - ${txIds.toString()}`
-        );
       });
+
+      console.log(
+        `tipped ${solAmount} SOL to ${to.toString()} - ${txIds.toString()}`
+      );
+
+      toast.show(`Tipped ${nickname} ${solAmount}SOL!`, { type: "success" });
     },
-    [connection, authedUser, authorizeSession]
+    [connection, authedUser, toast, authorizeSession]
   );
 
   const handleDismissTipModal = useCallback(() => {
@@ -345,6 +350,7 @@ export default function PostList({ userId, ...listProps }: PostListProps) {
                     if (tokenOption.name === "SOL") {
                       handleTipUserSol(
                         new PublicKey(tipUser.publicKey),
+                        tipUser.nickname,
                         amount
                       );
 

@@ -3,6 +3,7 @@ import merge from "lodash/merge";
 import React, { FunctionComponent, PropsWithChildren } from "react";
 import useSWR from "swr";
 import { SlurpUser } from "./types";
+import { useAuthorization } from "./useAuthorization";
 import { useSocialProtocolGetters } from "./useSocialProtocolGetters";
 
 const toSlurpUser = (user: User | null): SlurpUser | null =>
@@ -24,8 +25,9 @@ export const AuthedUserProvider: FunctionComponent<PropsWithChildren> = ({
   children,
 }) => {
   const socialProto = useSocialProtocolGetters();
+  const { selectedAccount } = useAuthorization();
   // TODO: needs updating to taking into account wallet switch,.
-  const auth = useSWR("authed-user", () =>
+  const auth = useSWR(`authed-user`, () =>
     socialProto?.getAuthedUser().then(toSlurpUser)
   );
 

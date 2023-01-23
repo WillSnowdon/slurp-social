@@ -5,6 +5,7 @@ import { ConnectionProvider } from "@solana/wallet-adapter-react";
 import { clusterApiUrl, PublicKey, PublicKeyInitData } from "@solana/web3.js";
 import React, { Suspense } from "react";
 import { AppState, SafeAreaView, StyleSheet } from "react-native";
+import { ToastProvider } from "react-native-toast-notifications";
 import { View } from "react-native-ui-lib";
 import { Cache, SWRConfig } from "swr";
 import MainScreen from "./src/screens/Main";
@@ -58,17 +59,19 @@ export default function App() {
       config={{ commitment: "processed" }}
       endpoint={DEVNET_ENDPOINT}
     >
-      <NavigationContainer>
-        <SafeAreaView style={styles.shell}>
-          <View flex bg-primaryBG>
-            <Suspense fallback={null}>
-              <SWRConfig value={{ provider: asyncStorageProvider }}>
-                <MainScreen />
-              </SWRConfig>
-            </Suspense>
-          </View>
-        </SafeAreaView>
-      </NavigationContainer>
+      <ToastProvider>
+        <NavigationContainer>
+          <SafeAreaView style={styles.shell}>
+            <View flex bg-primaryBG>
+              <Suspense fallback={null}>
+                <SWRConfig value={{ provider: asyncStorageProvider }}>
+                  <MainScreen />
+                </SWRConfig>
+              </Suspense>
+            </View>
+          </SafeAreaView>
+        </NavigationContainer>
+      </ToastProvider>
     </ConnectionProvider>
   );
 }

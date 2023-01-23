@@ -12,6 +12,7 @@ import {
 import Auth from "./Auth";
 import CreateUserScreen from "./CreateUser";
 import FeedNav from "./FeedNav";
+import SettingsScreen from "./Settings";
 
 const Tab = createBottomTabNavigator();
 export default function MainScreen() {
@@ -36,12 +37,19 @@ function ConnectedView() {
   return (
     <>
       {authedUser ? (
-        <Tab.Navigator>
+        <Tab.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarShowLabel: false,
+            tabBarStyle: {
+              backgroundColor: Colors.tabBarBG,
+            },
+          }}
+        >
           <Tab.Screen
             name="Home"
             component={FeedNav}
             options={{
-              headerShown: false,
               tabBarIcon: ({ size, focused }) => (
                 <MaterialCommunityIcons
                   accessibilityLabel="Feed"
@@ -60,10 +68,22 @@ function ConnectedView() {
                 />
               ),
               tabBarAccessibilityLabel: "Feed",
-              tabBarShowLabel: false,
-              tabBarStyle: {
-                backgroundColor: Colors.tabBarBG,
-              },
+            }}
+          />
+
+          <Tab.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              tabBarIcon: ({ size, focused }) => (
+                <MaterialCommunityIcons
+                  accessibilityLabel="Settings"
+                  size={size}
+                  name="account"
+                  color={focused ? Colors.tabBarIconActive : Colors.tabBarIcon}
+                />
+              ),
+              tabBarAccessibilityLabel: "Account Settings",
             }}
           />
         </Tab.Navigator>
