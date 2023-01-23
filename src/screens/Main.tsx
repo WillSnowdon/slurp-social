@@ -32,11 +32,23 @@ export default function MainScreen() {
 }
 
 function ConnectedView() {
-  const { authedUser, loadingUser } = useContext(AuthedUserContext);
+  const { authedUser, loadingUser, shouldCreateUser } =
+    useContext(AuthedUserContext);
 
   return (
     <>
-      {authedUser ? (
+      {loadingUser ? (
+        <View flex center bg-primaryBG>
+          <ActivityIndicator color={Colors.white} size={46} />
+          <View marginT-24>
+            <Text style={{ fontSize: 18 }} color={Colors.white}>
+              loading user deets...
+            </Text>
+          </View>
+        </View>
+      ) : shouldCreateUser ? (
+        <CreateUserScreen />
+      ) : (
         <Tab.Navigator
           screenOptions={{
             headerShown: false,
@@ -87,17 +99,6 @@ function ConnectedView() {
             }}
           />
         </Tab.Navigator>
-      ) : loadingUser ? (
-        <View flex center bg-primaryBG>
-          <ActivityIndicator color={Colors.white} size={46} />
-          <View marginT-24>
-            <Text style={{ fontSize: 18 }} color={Colors.white}>
-              loading user deets...
-            </Text>
-          </View>
-        </View>
-      ) : (
-        <CreateUserScreen />
       )}
     </>
   );
