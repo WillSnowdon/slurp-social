@@ -1,3 +1,4 @@
+import { PublicKey } from "@solana/web3.js";
 import { FileUriData } from "@spling/social-protocol";
 import React, { useCallback, useContext, useState } from "react";
 import { Image } from "react-native-image-crop-picker";
@@ -7,7 +8,7 @@ import {
   KeyboardAwareScrollView,
   View,
 } from "react-native-ui-lib";
-import { AuthedUserContext } from "../utils";
+import { AuthedUserContext, useAuthorization } from "../utils";
 import { useSplingTransact } from "../utils/transact";
 import EditableAvatar from "./EditableAvatar";
 
@@ -16,6 +17,7 @@ export default function CreateUserForm() {
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<Image>();
   const transact = useSplingTransact();
+  const { selectedAccount } = useAuthorization();
   const { updateUser } = useContext(AuthedUserContext);
 
   const handleCreateUser = useCallback(async () => {
@@ -31,7 +33,11 @@ export default function CreateUserForm() {
     });
 
     if (user) {
-      updateUser(user);
+      // For some reason pubKey isn't in returned response.
+      updateUser({
+        ...user,
+        publicKey: selectedAccount?.publicKey as PublicKey,
+      });
     }
   }, [transact, userName, bio, avatar, updateUser]);
 

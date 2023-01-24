@@ -10,7 +10,7 @@ const toSlurpUser = (user: User | null): SlurpUser | null =>
   user && {
     ...user,
     avatar: user.avatar ? user.avatar + `?${Date.now()}` : null,
-    publicKey: user.publicKey.toString(),
+    publicKey: user.publicKey?.toString(),
   };
 
 type AuthedUserContextConfig = {
