@@ -51,9 +51,9 @@ export const AuthedUserProvider: FunctionComponent<PropsWithChildren> = ({
         },
         updateUser: (user: User) => {
           // merge because update method doesn't have pubkey for some reason
-          const mergedUser = toSlurpUser(merge({}, auth.data, user));
+          const mergedUser = toSlurpUser(merge({}, auth.data || {}, user));
 
-          auth.mutate(mergedUser);
+          auth.mutate(mergedUser, { populateCache: true, revalidate: false });
         },
       }}
     >
