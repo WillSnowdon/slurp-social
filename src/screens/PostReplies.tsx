@@ -126,7 +126,6 @@ export default function PostReplies() {
     >
       <FlatList
         ListHeaderComponent={PostWithContext}
-        stickyHeaderIndices={[0]}
         style={{ flex: 1 }}
         data={replies}
         ListFooterComponent={Footer}

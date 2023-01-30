@@ -44,6 +44,7 @@ export default ({
   }, [imageUri]);
 
   const avatarSrc = useMemo(() => {
+    if (!post.user.avatar) return null;
     return {
       uri: (post.user.avatar + `?${Date.now()}`) as string,
     };
